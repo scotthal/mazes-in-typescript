@@ -7,7 +7,7 @@ ARG USER_GID=$USER_UID
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update; \
-  apt-get -y install locales less dialog apt-utils man-db bc zsh zip unzip sudo vim git lsb-release curl httpie jq; \
+  apt-get -y install locales less dialog apt-utils man-db bc zsh zip unzip sudo bat vim git lsb-release curl httpie jq; \
   apt-get -y dist-upgrade; \
   echo 'en_US.UTF-8 UTF-8' >> /etc/locale.gen; \
   locale-gen; \
