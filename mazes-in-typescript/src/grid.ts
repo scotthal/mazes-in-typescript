@@ -4,6 +4,9 @@ import { Coordinate } from "./coordinate";
 export class Grid {
   cells: Cell[];
   constructor(public rows: number, public columns: number) {
+    if (rows <= 0 || columns <= 0) {
+      throw new Error(`Invalid dimension rows=${rows} columns=${columns}`);
+    }
     this.cells = [];
     for (let y = 0; y < rows; y++) {
       for (let x = 0; x < columns; x++) {
