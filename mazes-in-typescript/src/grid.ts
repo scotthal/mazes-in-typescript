@@ -1,4 +1,4 @@
-import { Cell } from "./cell";
+import { Cell, DirectedCellLink } from "./cell";
 import { Coordinate } from "./coordinate";
 
 export class Grid {
@@ -76,6 +76,55 @@ export class Grid {
       return possibleCell;
     } else {
       throw new Error("I can't trust anything");
+    }
+  }
+
+  render(ctx: CanvasRenderingContext2D, cellWidth: number, cellHeight: number) {
+    for (const cell of this.cells) {
+      ctx.beginPath();
+      ctx.strokeStyle = "black";
+      ctx.lineWidth = 1;
+      if (!cell.directedLinks.includes(DirectedCellLink.NORTH)) {
+        ctx.moveTo(
+          cell.coordinate.x * cellWidth,
+          (cell.coordinate.y + 1) * cellHeight
+        );
+        ctx.lineTo(
+          (cell.coordinate.x + 1) * cellWidth,
+          (cell.coordinate.y + 1) * cellHeight
+        );
+      }
+      if (!cell.directedLinks.includes(DirectedCellLink.SOUTH)) {
+        ctx.moveTo(
+          cell.coordinate.x * cellWidth,
+          cell.coordinate.y * cellHeight
+        );
+        ctx.lineTo(
+          (cell.coordinate.x + 1) * cellWidth,
+          cell.coordinate.y * cellHeight
+        );
+      }
+      if (!cell.directedLinks.includes(DirectedCellLink.EAST)) {
+        ctx.moveTo(
+          (cell.coordinate.x + 1) * cellWidth,
+          cell.coordinate.y * cellHeight
+        );
+        ctx.lineTo(
+          (cell.coordinate.x + 1) * cellWidth,
+          (cell.coordinate.y + 1) * cellHeight
+        );
+      }
+      if (!cell.directedLinks.includes(DirectedCellLink.WEST)) {
+        ctx.moveTo(
+          cell.coordinate.x * cellWidth,
+          cell.coordinate.y * cellHeight
+        );
+        ctx.lineTo(
+          cell.coordinate.x * cellWidth,
+          (cell.coordinate.y + 1) * cellHeight
+        );
+      }
+      ctx.stroke();
     }
   }
 }
