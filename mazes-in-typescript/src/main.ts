@@ -13,6 +13,7 @@ const ctx = canvas.getContext("2d")!;
 const grid = new Grid(9, 9);
 sidewinder(grid);
 grid.computeDistancesForCell(new Coordinate(0, 0));
+console.log(grid.toString());
 
 function animate() {
   canvas.width = window.innerWidth;

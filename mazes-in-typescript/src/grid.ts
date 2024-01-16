@@ -89,6 +89,49 @@ export class Grid {
     }
   }
 
+  toString() {
+    let result = "";
+    for (let y = 0; y < this.rows; y++) {
+      for (let x = 0; x < this.columns; x++) {
+        const cell = this.getCell(new Coordinate(x, y));
+        if (!cell) {
+          throw new Error("Nonexistent cell in grid");
+        }
+        result += "+";
+        if (y === 0 || !cell.directedLinks.includes(DirectedCellLink.SOUTH)) {
+          result += "---";
+        } else {
+          result += "   ";
+        }
+      }
+      result += "+\n";
+      for (let x = 0; x < this.columns; x++) {
+        const cell = this.getCell(new Coordinate(x, y));
+        if (!cell) {
+          throw new Error("Nonexistent cell in grid.");
+        }
+        if (x === 0) {
+          result += "|";
+        }
+        if (
+          x === this.columns - 1 ||
+          !cell.directedLinks.includes(DirectedCellLink.EAST)
+        ) {
+          result += "   |";
+        } else {
+          result += "    ";
+        }
+      }
+      result += "\n";
+    }
+    for (let x = 0; x < this.columns; x++) {
+      result += "+---";
+    }
+    result += "+\n";
+
+    return result;
+  }
+
   render(ctx: CanvasRenderingContext2D, cellWidth: number, cellHeight: number) {
     for (const cell of this.cells) {
       ctx.beginPath();
