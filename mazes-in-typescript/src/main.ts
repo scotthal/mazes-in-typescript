@@ -1,5 +1,6 @@
 import "./style.css";
 
+import { Coordinate } from "./coordinate";
 import { Grid } from "./grid";
 import { sidewinder } from "./sidewinder";
 
@@ -9,8 +10,9 @@ app.appendChild(canvas);
 
 const ctx = canvas.getContext("2d")!;
 
-const grid = new Grid(30, 50);
+const grid = new Grid(9, 9);
 sidewinder(grid);
+grid.computeDistancesForCell(new Coordinate(0, 0));
 
 function animate() {
   canvas.width = window.innerWidth;

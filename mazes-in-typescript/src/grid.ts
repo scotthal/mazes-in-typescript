@@ -15,6 +15,17 @@ export class Grid {
     }
   }
 
+  getCellIndex(coordinate: Coordinate) {
+    return coordinate.y * this.columns + coordinate.x;
+  }
+
+  getCellAtIndex(index: number) {
+    if (index < 0 || index >= this.cells.length) {
+      return null;
+    }
+    return this.cells[index];
+  }
+
   getCell(coordinate: Coordinate) {
     if (
       coordinate.x < 0 ||
@@ -24,7 +35,7 @@ export class Grid {
     ) {
       return null;
     }
-    return this.cells[coordinate.y * this.columns + coordinate.x];
+    return this.getCellAtIndex(this.getCellIndex(coordinate));
   }
 
   getCellNorth(cell: Cell) {
@@ -69,9 +80,8 @@ export class Grid {
   }
 
   randomCell() {
-    const x = Math.floor(Math.random() * this.columns);
-    const y = Math.floor(Math.random() * this.rows);
-    const possibleCell = this.getCell(new Coordinate(x, y));
+    const index = Math.floor(Math.random() * this.cells.length);
+    const possibleCell = this.getCellAtIndex(index);
     if (possibleCell) {
       return possibleCell;
     } else {
@@ -125,6 +135,44 @@ export class Grid {
         );
       }
       ctx.stroke();
+    }
+  }
+
+  computeDistancesForCell(coordinate: Coordinate) {
+    const index = this.getCellIndex(coordinate);
+    const root = this.getCellAtIndex(index);
+    if (!root) {
+      throw new Error("Nothing exists");
+    }
+
+    root.distanceByIndex = new Array<number>(this.cells.length);
+    root.distanceByIndex = root.distanceByIndex.fill(-1, 0, this.cells.length);
+    root.distanceByIndex[index] = 0;
+    const todo: number[] = [];
+    for (const linkCoordinate of root.links) {
+      const linkIndex = this.getCellIndex(linkCoordinate);
+      root.distanceByIndex[linkIndex] = 1;
+      todo.push(linkIndex);
+    }
+
+    while (todo.length > 0) {
+      const currentIndex = todo.pop();
+      if (currentIndex === undefined) {
+        break;
+      }
+      const currentCell = this.getCellAtIndex(currentIndex);
+      if (currentCell === null) {
+        continue;
+      }
+      for (const linkCoordinate of currentCell.links) {
+        const linkIndex = this.getCellIndex(linkCoordinate);
+        if (root.distanceByIndex[linkIndex] != -1) {
+          continue;
+        }
+        root.distanceByIndex[linkIndex] =
+          root.distanceByIndex[currentIndex] + 1;
+        todo.push(linkIndex);
+      }
     }
   }
 }

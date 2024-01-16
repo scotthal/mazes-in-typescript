@@ -23,6 +23,7 @@ export function oppositeDirection(direction: DirectedCellLink) {
 export class Cell {
   links: Coordinate[] = [];
   directedLinks: DirectedCellLink[] = [];
+  distanceByIndex: number[] = [];
   constructor(public coordinate: Coordinate) {}
 
   private linkInternal(coordinate: Coordinate, direction: DirectedCellLink) {
