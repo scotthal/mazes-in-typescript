@@ -1,6 +1,8 @@
 import { Cell, DirectedCellLink } from "./cell";
 import { Coordinate } from "./coordinate";
 
+export type GridStringContentProvider = (coordinate: Coordinate) => string;
+
 export class Grid {
   cells: Cell[];
   constructor(public rows: number, public columns: number) {
@@ -89,7 +91,9 @@ export class Grid {
     }
   }
 
-  toString() {
+  toString(
+    contentProvider: GridStringContentProvider = (_coordinate: Coordinate) => ""
+  ) {
     let result = "";
     for (let y = 0; y < this.rows; y++) {
       for (let x = 0; x < this.columns; x++) {
@@ -113,13 +117,18 @@ export class Grid {
         if (x === 0) {
           result += "|";
         }
+        const content = contentProvider(cell.coordinate);
+        for (let i = 0; i < 3 - content.length; i++) {
+          result += " ";
+        }
+        result += `${content}`;
         if (
           x === this.columns - 1 ||
           !cell.directedLinks.includes(DirectedCellLink.EAST)
         ) {
-          result += "   |";
+          result += "|";
         } else {
-          result += "    ";
+          result += " ";
         }
       }
       result += "\n";
@@ -217,5 +226,16 @@ export class Grid {
         todo.push(linkIndex);
       }
     }
+  }
+
+  toDistanceString(coordinate: Coordinate) {
+    const root = this.getCell(coordinate);
+    if (!root) {
+      return "";
+    }
+    return this.toString((coordinate: Coordinate) => {
+      const index = this.getCellIndex(coordinate);
+      return `${root.distanceByIndex[index]}`;
+    });
   }
 }
