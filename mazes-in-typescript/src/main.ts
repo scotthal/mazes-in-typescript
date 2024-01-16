@@ -14,6 +14,8 @@ const grid = new Grid(9, 9);
 sidewinder(grid);
 grid.computeDistancesForCell(new Coordinate(0, 0));
 console.log(grid.toDistanceString(new Coordinate(0, 0)));
+const path = grid.computePath(new Coordinate(0, 0), new Coordinate(8, 0));
+console.log(grid.toPathString(path));
 
 function animate() {
   canvas.width = window.innerWidth;

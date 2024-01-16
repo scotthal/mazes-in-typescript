@@ -238,4 +238,42 @@ export class Grid {
       return `${root.distanceByIndex[index]}`;
     });
   }
+
+  computePath(rootCoordinate: Coordinate, originCoordinate: Coordinate) {
+    const root = this.getCell(rootCoordinate);
+    if (!root) {
+      throw new Error("No cell at root coordinate");
+    }
+    const distanceByIndex = root.distanceByIndex;
+
+    const rootIndex = this.getCellIndex(rootCoordinate);
+    let currentIndex = this.getCellIndex(originCoordinate);
+
+    const breadcrumbs = new Array<number>(this.cells.length);
+    breadcrumbs.fill(-1, 0, breadcrumbs.length);
+    breadcrumbs[currentIndex] = distanceByIndex[currentIndex];
+
+    while (currentIndex != rootIndex) {
+      const currentCell = this.getCellAtIndex(currentIndex);
+      if (!currentCell) {
+        throw new Error("Grid appears corrupt");
+      }
+      for (const neighbor of currentCell.links) {
+        const neighborIndex = this.getCellIndex(neighbor);
+        if (distanceByIndex[neighborIndex] < distanceByIndex[currentIndex]) {
+          breadcrumbs[neighborIndex] = distanceByIndex[neighborIndex];
+          currentIndex = neighborIndex;
+          break;
+        }
+      }
+    }
+    return breadcrumbs;
+  }
+
+  toPathString(path: number[]) {
+    return this.toString((coordinate: Coordinate) => {
+      const index = this.getCellIndex(coordinate);
+      return path[index] === -1 ? "" : `${path[index]}`;
+    });
+  }
 }
