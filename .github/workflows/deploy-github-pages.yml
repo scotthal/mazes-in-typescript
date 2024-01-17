@@ -4,14 +4,11 @@ on:
     branches:
       - main
 jobs:
-  deploy_github_pages:
-    name: Deploy Github Pages
+  build:
+    runs-on: ubuntu-latest
     permissions:
       pages: write
       id-token: write
-    environment:
-      name: github-pages
-    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -22,5 +19,14 @@ jobs:
         with:
           name: github-pages
           path: mazes-in-typescript/dist
+  deploy_github_pages:
+    name: Deploy Github Pages
+    environment:
+      name: github-pages
+      url: ${{steps.deployment.outputs.page_url}}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
       - name: Deploy Github Pages
+        id: deployment
         uses: actions/deploy-pages@v4
