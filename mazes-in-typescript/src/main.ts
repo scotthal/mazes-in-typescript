@@ -10,18 +10,32 @@ app.appendChild(canvas);
 
 const ctx = canvas.getContext("2d")!;
 
-const grid = new Grid(9, 9);
+const grid = new Grid(25, 25);
 sidewinder(grid);
-console.log(grid.toDistanceString(new Coordinate(0, 0)));
-const path = grid.longestPath(new Coordinate(0, 0));
-console.log(grid.toPathString(path));
+const distanceByIndex = grid.computeDistancesForCell(new Coordinate(12, 12));
+if (!distanceByIndex) {
+  throw new Error("Couldn't calculate cell distances");
+}
+
+const maxDistance = Math.max(...distanceByIndex);
 
 function animate() {
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
+  const cellWidth = canvas.width / grid.columns;
+  const cellHeight = canvas.height / grid.rows;
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  grid.render(ctx, canvas.width / grid.columns, canvas.height / grid.rows);
+  if (distanceByIndex) {
+    grid.renderBackgroundColors(
+      ctx,
+      cellWidth,
+      cellHeight,
+      distanceByIndex,
+      maxDistance
+    );
+  }
+  grid.render(ctx, cellWidth, cellHeight);
 
   window.requestAnimationFrame(animate);
 }

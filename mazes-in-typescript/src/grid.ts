@@ -229,11 +229,13 @@ export class Grid {
         todo.push(linkIndex);
       }
     }
+
+    return root.distanceByIndex;
   }
 
   computeDistancesForCell(coordinate: Coordinate) {
     const index = this.getCellIndex(coordinate);
-    this.computeDistancesForCellIndex(index);
+    return this.computeDistancesForCellIndex(index);
   }
 
   toDistanceString(coordinate: Coordinate) {
@@ -294,7 +296,7 @@ export class Grid {
     });
   }
 
-  private findMaxDistance(rootIndex: number) {
+  findMaxDistance(rootIndex: number) {
     const root = this.getCellAtIndex(rootIndex);
     if (!root) {
       throw new Error("Invalid root coordinate");
@@ -318,5 +320,36 @@ export class Grid {
     this.computeDistancesForCellIndex(startIndex);
     const [goalIndex, _goalDistance] = this.findMaxDistance(startIndex);
     return this.computePathForIndices(startIndex, goalIndex);
+  }
+
+  private backgroundColorForDistance(distance: number, maxDistance: number) {
+    const intensity = (maxDistance - distance) / maxDistance;
+    const dark = Math.floor(255 * intensity);
+    const bright = Math.floor(128 + 127 * intensity);
+    return `rgb(${dark}, ${bright}, ${dark})`;
+  }
+
+  renderBackgroundColors(
+    ctx: CanvasRenderingContext2D,
+    cellWidth: number,
+    cellHeight: number,
+    distanceByIndex: number[],
+    maxDistance: number
+  ) {
+    for (let index = 0; index < this.cells.length; index++) {
+      ctx.save();
+      ctx.beginPath();
+      ctx.fillStyle = this.backgroundColorForDistance(
+        distanceByIndex[index],
+        maxDistance
+      );
+      ctx.fillRect(
+        this.cells[index].coordinate.x * cellWidth,
+        this.cells[index].coordinate.y * cellHeight,
+        cellWidth,
+        cellHeight
+      );
+      ctx.restore();
+    }
   }
 }
