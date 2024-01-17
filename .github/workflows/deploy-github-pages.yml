@@ -15,12 +15,12 @@ jobs:
       - name: Build
         run: cd mazes-in-typescript && npm install && npm run build
       - name: Archive
-        run: cd mazes-in-typescript/dist && tar -cf ../../github-pages.tar *
+        run: cd mazes-in-typescript/dist && find . | xargs tar -cf $RUNNER_TEMP/artifact.tar
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: github-pages
-          path: github-pages.tar
+          path: ${{runner.temp}}/artifact.tar
           retention-days: 1
   deploy_github_pages:
     name: Deploy Github Pages
