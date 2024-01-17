@@ -296,6 +296,44 @@ export class Grid {
     });
   }
 
+  private backgroundColorForPathDistance(
+    distance: number,
+    maxDistance: number
+  ) {
+    const intensity = Math.min((maxDistance - distance) / maxDistance, 0.85);
+    const dark = Math.floor(255 * intensity);
+    const bright = Math.floor(128 + 127 - intensity);
+    return `rgb(${bright}, ${dark}, ${dark})`;
+  }
+
+  renderPathBackgroundColors(
+    ctx: CanvasRenderingContext2D,
+    cellWidth: number,
+    cellHeight: number,
+    path: number[],
+    maxPathDistance: number
+  ) {
+    for (let index = 0; index < this.cells.length; index++) {
+      ctx.save();
+      ctx.beginPath();
+      const pathDistance = path[index];
+      if (pathDistance === -1) {
+        continue;
+      }
+      ctx.fillStyle = this.backgroundColorForPathDistance(
+        pathDistance,
+        maxPathDistance
+      );
+      ctx.fillRect(
+        this.cells[index].coordinate.x * cellWidth,
+        this.cells[index].coordinate.y * cellHeight,
+        cellWidth,
+        cellHeight
+      );
+      ctx.restore();
+    }
+  }
+
   findMaxDistance(rootIndex: number) {
     const root = this.getCellAtIndex(rootIndex);
     if (!root) {

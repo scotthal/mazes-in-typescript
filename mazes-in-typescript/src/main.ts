@@ -11,13 +11,16 @@ app.appendChild(canvas);
 const ctx = canvas.getContext("2d")!;
 
 const grid = new Grid(25, 25);
+const rootCoordinate = new Coordinate(12, 12);
 sidewinder(grid);
-const distanceByIndex = grid.computeDistancesForCell(new Coordinate(12, 12));
+const distanceByIndex = grid.computeDistancesForCell(rootCoordinate);
 if (!distanceByIndex) {
   throw new Error("Couldn't calculate cell distances");
 }
-
 const maxDistance = Math.max(...distanceByIndex);
+
+const longestPath = grid.longestPath(rootCoordinate);
+const longestPathMaxDistance = Math.max(...longestPath);
 
 function animate() {
   canvas.width = window.innerWidth;
@@ -35,6 +38,13 @@ function animate() {
       maxDistance
     );
   }
+  grid.renderPathBackgroundColors(
+    ctx,
+    cellWidth,
+    cellHeight,
+    longestPath,
+    longestPathMaxDistance
+  );
   grid.render(ctx, cellWidth, cellHeight);
 
   window.requestAnimationFrame(animate);
