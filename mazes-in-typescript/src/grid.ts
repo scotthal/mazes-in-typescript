@@ -3,6 +3,11 @@ import { Coordinate } from "./coordinate";
 
 export type GridStringContentProvider = (coordinate: Coordinate) => string;
 
+export interface PathInformation {
+  distanceByIndex: number[];
+  orderedIndices: number[];
+}
+
 export class Grid {
   cells: Cell[];
   constructor(public rows: number, public columns: number) {
@@ -264,6 +269,8 @@ export class Grid {
     const breadcrumbs = new Array<number>(this.cells.length);
     breadcrumbs.fill(-1, 0, breadcrumbs.length);
     breadcrumbs[currentIndex] = distanceByIndex[currentIndex];
+    const orderedIndices = [];
+    orderedIndices.push(currentIndex);
 
     while (currentIndex != rootIndex) {
       const currentCell = this.getCellAtIndex(currentIndex);
@@ -275,11 +282,15 @@ export class Grid {
         if (distanceByIndex[neighborIndex] < distanceByIndex[currentIndex]) {
           breadcrumbs[neighborIndex] = distanceByIndex[neighborIndex];
           currentIndex = neighborIndex;
+          orderedIndices.push(currentIndex);
           break;
         }
       }
     }
-    return breadcrumbs;
+    return {
+      distanceByIndex: breadcrumbs,
+      orderedIndices: orderedIndices,
+    } as PathInformation;
   }
 
   computePath(rootCoordinate: Coordinate, originCoordinate: Coordinate) {
@@ -296,42 +307,31 @@ export class Grid {
     });
   }
 
-  private backgroundColorForPathDistance(
-    distance: number,
-    maxDistance: number
-  ) {
-    const intensity = Math.min((maxDistance - distance) / maxDistance, 0.85);
-    const dark = Math.floor(255 * intensity);
-    const bright = Math.floor(128 + 127 - intensity);
-    return `rgb(${bright}, ${dark}, ${dark})`;
-  }
-
-  renderPathBackgroundColors(
+  renderOrderedIndexPath(
     ctx: CanvasRenderingContext2D,
     cellWidth: number,
     cellHeight: number,
-    path: number[],
-    maxPathDistance: number
+    orderedIndices: number[]
   ) {
-    for (let index = 0; index < this.cells.length; index++) {
-      ctx.save();
-      ctx.beginPath();
-      const pathDistance = path[index];
-      if (pathDistance === -1) {
-        continue;
-      }
-      ctx.fillStyle = this.backgroundColorForPathDistance(
-        pathDistance,
-        maxPathDistance
+    const halfCellWidth = Math.floor(cellWidth / 2);
+    const halfCellHeight = Math.floor(cellHeight / 2);
+
+    ctx.save();
+    ctx.beginPath();
+    ctx.strokeStyle = "red";
+    ctx.lineWidth = Math.min(0.1 * cellWidth, 0.2 * cellHeight);
+    ctx.moveTo(
+      this.cells[orderedIndices[0]].coordinate.x * cellWidth + halfCellWidth,
+      this.cells[orderedIndices[0]].coordinate.y * cellHeight + halfCellHeight
+    );
+    for (const index of orderedIndices) {
+      ctx.lineTo(
+        this.cells[index].coordinate.x * cellWidth + halfCellWidth,
+        this.cells[index].coordinate.y * cellHeight + halfCellHeight
       );
-      ctx.fillRect(
-        this.cells[index].coordinate.x * cellWidth,
-        this.cells[index].coordinate.y * cellHeight,
-        cellWidth,
-        cellHeight
-      );
-      ctx.restore();
     }
+    ctx.stroke();
+    ctx.restore();
   }
 
   findMaxDistance(rootIndex: number) {

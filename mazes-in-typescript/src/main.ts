@@ -19,8 +19,8 @@ if (!distanceByIndex) {
 }
 const maxDistance = Math.max(...distanceByIndex);
 
-const longestPath = grid.longestPath(rootCoordinate);
-const longestPathMaxDistance = Math.max(...longestPath);
+const { distanceByIndex: _, orderedIndices: longestPathOrderedIndices } =
+  grid.longestPath(rootCoordinate);
 
 function animate() {
   canvas.width = window.innerWidth;
@@ -38,12 +38,11 @@ function animate() {
       maxDistance
     );
   }
-  grid.renderPathBackgroundColors(
+  grid.renderOrderedIndexPath(
     ctx,
     cellWidth,
     cellHeight,
-    longestPath,
-    longestPathMaxDistance
+    longestPathOrderedIndices
   );
   grid.render(ctx, cellWidth, cellHeight);
 
