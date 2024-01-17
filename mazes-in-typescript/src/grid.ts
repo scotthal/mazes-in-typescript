@@ -190,11 +190,14 @@ export class Grid {
     }
   }
 
-  computeDistancesForCell(coordinate: Coordinate) {
-    const index = this.getCellIndex(coordinate);
+  computeDistancesForCellIndex(index: number) {
     const root = this.getCellAtIndex(index);
     if (!root) {
       throw new Error("Nothing exists");
+    }
+
+    if (root.distanceByIndex.length === this.cells.length) {
+      return;
     }
 
     root.distanceByIndex = new Array<number>(this.cells.length);
@@ -228,7 +231,13 @@ export class Grid {
     }
   }
 
+  computeDistancesForCell(coordinate: Coordinate) {
+    const index = this.getCellIndex(coordinate);
+    this.computeDistancesForCellIndex(index);
+  }
+
   toDistanceString(coordinate: Coordinate) {
+    this.computeDistancesForCell(coordinate);
     const root = this.getCell(coordinate);
     if (!root) {
       return "";
@@ -239,15 +248,16 @@ export class Grid {
     });
   }
 
-  computePath(rootCoordinate: Coordinate, originCoordinate: Coordinate) {
-    const root = this.getCell(rootCoordinate);
+  computePathForIndices(rootIndex: number, originIndex: number) {
+    this.computeDistancesForCellIndex(rootIndex);
+    const root = this.getCellAtIndex(rootIndex);
     if (!root) {
       throw new Error("No cell at root coordinate");
     }
+
     const distanceByIndex = root.distanceByIndex;
 
-    const rootIndex = this.getCellIndex(rootCoordinate);
-    let currentIndex = this.getCellIndex(originCoordinate);
+    let currentIndex = originIndex;
 
     const breadcrumbs = new Array<number>(this.cells.length);
     breadcrumbs.fill(-1, 0, breadcrumbs.length);
@@ -270,10 +280,43 @@ export class Grid {
     return breadcrumbs;
   }
 
+  computePath(rootCoordinate: Coordinate, originCoordinate: Coordinate) {
+    const rootIndex = this.getCellIndex(rootCoordinate);
+    const originIndex = this.getCellIndex(originCoordinate);
+
+    return this.computePathForIndices(rootIndex, originIndex);
+  }
+
   toPathString(path: number[]) {
     return this.toString((coordinate: Coordinate) => {
       const index = this.getCellIndex(coordinate);
       return path[index] === -1 ? "" : `${path[index]}`;
     });
+  }
+
+  private findMaxDistance(rootIndex: number) {
+    const root = this.getCellAtIndex(rootIndex);
+    if (!root) {
+      throw new Error("Invalid root coordinate");
+    }
+
+    let maxDistance = -1;
+    let maxDistanceIndex = -1;
+    for (let i = 0; i < root.distanceByIndex.length; i++) {
+      if (root.distanceByIndex[i] > maxDistance) {
+        maxDistance = root.distanceByIndex[i];
+        maxDistanceIndex = i;
+      }
+    }
+    return [maxDistanceIndex, maxDistance];
+  }
+
+  longestPath(rootCoordinate: Coordinate) {
+    const rootIndex = this.getCellIndex(rootCoordinate);
+    this.computeDistancesForCellIndex(rootIndex);
+    const [startIndex, _rootMaxDistance] = this.findMaxDistance(rootIndex);
+    this.computeDistancesForCellIndex(startIndex);
+    const [goalIndex, _goalDistance] = this.findMaxDistance(startIndex);
+    return this.computePathForIndices(startIndex, goalIndex);
   }
 }
