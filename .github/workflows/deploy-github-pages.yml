@@ -20,6 +20,7 @@ jobs:
       - name: Upload Artifacts
         uses: actions/upload-pages-artifact@v2
         with:
+          name: github-pages
           path: mazes-in-typescript/dist
       - name: Deploy Github Pages
         uses: actions/deploy-pages@v4
