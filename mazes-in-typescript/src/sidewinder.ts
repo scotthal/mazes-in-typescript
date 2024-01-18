@@ -1,12 +1,11 @@
 import { Cell, DirectedCellLink } from "./cell";
-import { Coordinate } from "./coordinate";
 import { Grid } from "./grid";
 
 export function sidewinder(grid: Grid) {
   for (let y = 0; y < grid.rows; y++) {
     let run: Cell[] = [];
     for (let x = 0; x < grid.columns; x++) {
-      const cell = grid.getCell(new Coordinate(x, y));
+      const cell = grid.getCell(x, y);
       if (!cell) {
         throw new Error("I can't believe in anything");
       }

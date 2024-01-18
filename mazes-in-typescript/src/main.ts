@@ -1,6 +1,5 @@
 import "./style.css";
 
-import { Coordinate } from "./coordinate";
 import { Grid } from "./grid";
 import { sidewinder } from "./sidewinder";
 
@@ -11,16 +10,17 @@ app.appendChild(canvas);
 const ctx = canvas.getContext("2d")!;
 
 const grid = new Grid(25, 25);
-const rootCoordinate = new Coordinate(12, 12);
+const rootX = 12;
+const rootY = 12;
 sidewinder(grid);
-const distanceByIndex = grid.computeDistancesForCell(rootCoordinate);
+const distanceByIndex = grid.computeDistancesForCell(rootX, rootY);
 if (!distanceByIndex) {
   throw new Error("Couldn't calculate cell distances");
 }
 const maxDistance = Math.max(...distanceByIndex);
 
 const { distanceByIndex: _, orderedIndices: longestPathOrderedIndices } =
-  grid.longestPath(rootCoordinate);
+  grid.longestPath(rootX, rootY);
 
 function animate() {
   canvas.width = window.innerWidth;

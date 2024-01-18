@@ -1,5 +1,3 @@
-import { Coordinate } from "./coordinate";
-
 export enum DirectedCellLink {
   NORTH,
   SOUTH,
@@ -21,24 +19,24 @@ export function oppositeDirection(direction: DirectedCellLink) {
 }
 
 export class Cell {
-  links: Coordinate[] = [];
+  links: [number, number][] = [];
   directedLinks: DirectedCellLink[] = [];
   distanceByIndex: number[] = [];
-  constructor(public coordinate: Coordinate) {}
+  constructor(public x: number, public y: number) {}
 
-  private linkInternal(coordinate: Coordinate, direction: DirectedCellLink) {
-    this.links.push(coordinate);
+  private linkInternal(x: number, y: number, direction: DirectedCellLink) {
+    this.links.push([x, y]);
     this.directedLinks.push(direction);
   }
 
   link(cell: Cell, direction: DirectedCellLink) {
-    this.linkInternal(cell.coordinate, direction);
-    cell.linkInternal(this.coordinate, oppositeDirection(direction));
+    this.linkInternal(cell.x, cell.y, direction);
+    cell.linkInternal(this.x, this.y, oppositeDirection(direction));
   }
 
-  private unlinkInternal(coordinate: Coordinate, direction: DirectedCellLink) {
-    this.links = this.links.filter((link) => {
-      link.x !== coordinate.x && link.y !== coordinate.y;
+  private unlinkInternal(x: number, y: number, direction: DirectedCellLink) {
+    this.links = this.links.filter(([linkX, linkY]) => {
+      linkX !== x && linkY !== y;
     });
     this.directedLinks = this.directedLinks.filter((linkDirection) => {
       linkDirection !== direction;
@@ -46,7 +44,7 @@ export class Cell {
   }
 
   unlink(cell: Cell, direction: DirectedCellLink) {
-    this.unlinkInternal(cell.coordinate, direction);
-    cell.unlinkInternal(this.coordinate, oppositeDirection(direction));
+    this.unlinkInternal(cell.x, cell.y, direction);
+    cell.unlinkInternal(this.x, this.y, oppositeDirection(direction));
   }
 }

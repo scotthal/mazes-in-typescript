@@ -1,7 +1,6 @@
 import { Cell, DirectedCellLink } from "./cell";
-import { Coordinate } from "./coordinate";
 
-export type GridStringContentProvider = (coordinate: Coordinate) => string;
+export type GridStringContentProvider = (x: number, y: number) => string;
 
 export interface PathInformation {
   distanceByIndex: number[];
@@ -17,13 +16,13 @@ export class Grid {
     this.cells = [];
     for (let y = 0; y < rows; y++) {
       for (let x = 0; x < columns; x++) {
-        this.cells.push(new Cell(new Coordinate(x, y)));
+        this.cells.push(new Cell(x, y));
       }
     }
   }
 
-  getCellIndex(coordinate: Coordinate) {
-    return coordinate.y * this.columns + coordinate.x;
+  getCellIndex(x: number, y: number) {
+    return y * this.columns + x;
   }
 
   getCellAtIndex(index: number) {
@@ -33,51 +32,34 @@ export class Grid {
     return this.cells[index];
   }
 
-  getCell(coordinate: Coordinate) {
-    if (
-      coordinate.x < 0 ||
-      coordinate.x >= this.columns ||
-      coordinate.y < 0 ||
-      coordinate.y >= this.rows
-    ) {
+  getCell(x: number, y: number) {
+    if (x < 0 || x >= this.columns || y < 0 || y >= this.rows) {
       return null;
     }
-    return this.getCellAtIndex(this.getCellIndex(coordinate));
+    return this.getCellAtIndex(this.getCellIndex(x, y));
   }
 
   getCellNorth(cell: Cell) {
-    return this.getCell(
-      new Coordinate(cell.coordinate.x, cell.coordinate.y + 1)
-    );
+    return this.getCell(cell.x, cell.y + 1);
   }
 
   getCellSouth(cell: Cell) {
-    return this.getCell(
-      new Coordinate(cell.coordinate.x, cell.coordinate.y - 1)
-    );
+    return this.getCell(cell.x, cell.y - 1);
   }
 
   getCellEast(cell: Cell) {
-    return this.getCell(
-      new Coordinate(cell.coordinate.x + 1, cell.coordinate.y)
-    );
+    return this.getCell(cell.x + 1, cell.y);
   }
 
   getCellWest(cell: Cell) {
-    return this.getCell(
-      new Coordinate(cell.coordinate.x - 1, cell.coordinate.y)
-    );
+    return this.getCell(cell.x - 1, cell.y);
   }
 
   getCellNeighbors(cell: Cell) {
     const result: Cell[] = [];
     for (let y = -1; y <= 1; y++) {
       for (let x = -1; x <= 1; x++) {
-        const currentCoordinate = new Coordinate(
-          x + cell.coordinate.x,
-          y + cell.coordinate.y
-        );
-        const possibleCell = this.getCell(currentCoordinate);
+        const possibleCell = this.getCell(x + cell.x, y + cell.y);
         if (possibleCell) {
           result.push(possibleCell);
         }
@@ -92,17 +74,15 @@ export class Grid {
     if (possibleCell) {
       return possibleCell;
     } else {
-      throw new Error("I can't trust anything");
+      throw new Error("Nonexistent cell in grid");
     }
   }
 
-  toString(
-    contentProvider: GridStringContentProvider = (_coordinate: Coordinate) => ""
-  ) {
+  toString(contentProvider: GridStringContentProvider = (_x, _y) => "") {
     let result = "";
     for (let y = 0; y < this.rows; y++) {
       for (let x = 0; x < this.columns; x++) {
-        const cell = this.getCell(new Coordinate(x, y));
+        const cell = this.getCell(x, y);
         if (!cell) {
           throw new Error("Nonexistent cell in grid");
         }
@@ -115,14 +95,14 @@ export class Grid {
       }
       result += "+\n";
       for (let x = 0; x < this.columns; x++) {
-        const cell = this.getCell(new Coordinate(x, y));
+        const cell = this.getCell(x, y);
         if (!cell) {
           throw new Error("Nonexistent cell in grid.");
         }
         if (x === 0) {
           result += "|";
         }
-        const content = contentProvider(cell.coordinate);
+        const content = contentProvider(x, y);
         for (let i = 0; i < 3 - content.length; i++) {
           result += " ";
         }
@@ -152,44 +132,20 @@ export class Grid {
       ctx.strokeStyle = "black";
       ctx.lineWidth = 1;
       if (!cell.directedLinks.includes(DirectedCellLink.NORTH)) {
-        ctx.moveTo(
-          cell.coordinate.x * cellWidth,
-          (cell.coordinate.y + 1) * cellHeight
-        );
-        ctx.lineTo(
-          (cell.coordinate.x + 1) * cellWidth,
-          (cell.coordinate.y + 1) * cellHeight
-        );
+        ctx.moveTo(cell.x * cellWidth, (cell.y + 1) * cellHeight);
+        ctx.lineTo((cell.x + 1) * cellWidth, (cell.y + 1) * cellHeight);
       }
       if (!cell.directedLinks.includes(DirectedCellLink.SOUTH)) {
-        ctx.moveTo(
-          cell.coordinate.x * cellWidth,
-          cell.coordinate.y * cellHeight
-        );
-        ctx.lineTo(
-          (cell.coordinate.x + 1) * cellWidth,
-          cell.coordinate.y * cellHeight
-        );
+        ctx.moveTo(cell.x * cellWidth, cell.y * cellHeight);
+        ctx.lineTo((cell.x + 1) * cellWidth, cell.y * cellHeight);
       }
       if (!cell.directedLinks.includes(DirectedCellLink.EAST)) {
-        ctx.moveTo(
-          (cell.coordinate.x + 1) * cellWidth,
-          cell.coordinate.y * cellHeight
-        );
-        ctx.lineTo(
-          (cell.coordinate.x + 1) * cellWidth,
-          (cell.coordinate.y + 1) * cellHeight
-        );
+        ctx.moveTo((cell.x + 1) * cellWidth, cell.y * cellHeight);
+        ctx.lineTo((cell.x + 1) * cellWidth, (cell.y + 1) * cellHeight);
       }
       if (!cell.directedLinks.includes(DirectedCellLink.WEST)) {
-        ctx.moveTo(
-          cell.coordinate.x * cellWidth,
-          cell.coordinate.y * cellHeight
-        );
-        ctx.lineTo(
-          cell.coordinate.x * cellWidth,
-          (cell.coordinate.y + 1) * cellHeight
-        );
+        ctx.moveTo(cell.x * cellWidth, cell.y * cellHeight);
+        ctx.lineTo(cell.x * cellWidth, (cell.y + 1) * cellHeight);
       }
       ctx.stroke();
     }
@@ -209,8 +165,8 @@ export class Grid {
     root.distanceByIndex = root.distanceByIndex.fill(-1, 0, this.cells.length);
     root.distanceByIndex[index] = 0;
     const todo: number[] = [];
-    for (const linkCoordinate of root.links) {
-      const linkIndex = this.getCellIndex(linkCoordinate);
+    for (const [linkX, linkY] of root.links) {
+      const linkIndex = this.getCellIndex(linkX, linkY);
       root.distanceByIndex[linkIndex] = 1;
       todo.push(linkIndex);
     }
@@ -224,8 +180,8 @@ export class Grid {
       if (currentCell === null) {
         continue;
       }
-      for (const linkCoordinate of currentCell.links) {
-        const linkIndex = this.getCellIndex(linkCoordinate);
+      for (const [linkX, linkY] of currentCell.links) {
+        const linkIndex = this.getCellIndex(linkX, linkY);
         if (root.distanceByIndex[linkIndex] != -1) {
           continue;
         }
@@ -238,19 +194,19 @@ export class Grid {
     return root.distanceByIndex;
   }
 
-  computeDistancesForCell(coordinate: Coordinate) {
-    const index = this.getCellIndex(coordinate);
+  computeDistancesForCell(x: number, y: number) {
+    const index = this.getCellIndex(x, y);
     return this.computeDistancesForCellIndex(index);
   }
 
-  toDistanceString(coordinate: Coordinate) {
-    this.computeDistancesForCell(coordinate);
-    const root = this.getCell(coordinate);
+  toDistanceString(x: number, y: number) {
+    this.computeDistancesForCell(x, y);
+    const root = this.getCell(x, y);
     if (!root) {
       return "";
     }
-    return this.toString((coordinate: Coordinate) => {
-      const index = this.getCellIndex(coordinate);
+    return this.toString((x, y) => {
+      const index = this.getCellIndex(x, y);
       return `${root.distanceByIndex[index]}`;
     });
   }
@@ -259,7 +215,7 @@ export class Grid {
     this.computeDistancesForCellIndex(rootIndex);
     const root = this.getCellAtIndex(rootIndex);
     if (!root) {
-      throw new Error("No cell at root coordinate");
+      throw new Error("No cell at root location");
     }
 
     const distanceByIndex = root.distanceByIndex;
@@ -277,8 +233,8 @@ export class Grid {
       if (!currentCell) {
         throw new Error("Grid appears corrupt");
       }
-      for (const neighbor of currentCell.links) {
-        const neighborIndex = this.getCellIndex(neighbor);
+      for (const [neighborX, neighborY] of currentCell.links) {
+        const neighborIndex = this.getCellIndex(neighborX, neighborY);
         if (distanceByIndex[neighborIndex] < distanceByIndex[currentIndex]) {
           breadcrumbs[neighborIndex] = distanceByIndex[neighborIndex];
           currentIndex = neighborIndex;
@@ -293,16 +249,16 @@ export class Grid {
     } as PathInformation;
   }
 
-  computePath(rootCoordinate: Coordinate, originCoordinate: Coordinate) {
-    const rootIndex = this.getCellIndex(rootCoordinate);
-    const originIndex = this.getCellIndex(originCoordinate);
+  computePath(rootX: number, rootY: number, originX: number, originY: number) {
+    const rootIndex = this.getCellIndex(rootX, rootY);
+    const originIndex = this.getCellIndex(originX, originY);
 
     return this.computePathForIndices(rootIndex, originIndex);
   }
 
   toPathString(path: number[]) {
-    return this.toString((coordinate: Coordinate) => {
-      const index = this.getCellIndex(coordinate);
+    return this.toString((x, y) => {
+      const index = this.getCellIndex(x, y);
       return path[index] === -1 ? "" : `${path[index]}`;
     });
   }
@@ -321,13 +277,13 @@ export class Grid {
     ctx.strokeStyle = "red";
     ctx.lineWidth = Math.min(0.1 * cellWidth, 0.2 * cellHeight);
     ctx.moveTo(
-      this.cells[orderedIndices[0]].coordinate.x * cellWidth + halfCellWidth,
-      this.cells[orderedIndices[0]].coordinate.y * cellHeight + halfCellHeight
+      this.cells[orderedIndices[0]].x * cellWidth + halfCellWidth,
+      this.cells[orderedIndices[0]].y * cellHeight + halfCellHeight
     );
     for (const index of orderedIndices) {
       ctx.lineTo(
-        this.cells[index].coordinate.x * cellWidth + halfCellWidth,
-        this.cells[index].coordinate.y * cellHeight + halfCellHeight
+        this.cells[index].x * cellWidth + halfCellWidth,
+        this.cells[index].y * cellHeight + halfCellHeight
       );
     }
     ctx.stroke();
@@ -337,7 +293,7 @@ export class Grid {
   findMaxDistance(rootIndex: number) {
     const root = this.getCellAtIndex(rootIndex);
     if (!root) {
-      throw new Error("Invalid root coordinate");
+      throw new Error("Invalid root location");
     }
 
     let maxDistance = -1;
@@ -351,8 +307,8 @@ export class Grid {
     return [maxDistanceIndex, maxDistance];
   }
 
-  longestPath(rootCoordinate: Coordinate) {
-    const rootIndex = this.getCellIndex(rootCoordinate);
+  longestPath(rootX: number, rootY: number) {
+    const rootIndex = this.getCellIndex(rootX, rootY);
     this.computeDistancesForCellIndex(rootIndex);
     const [startIndex, _rootMaxDistance] = this.findMaxDistance(rootIndex);
     this.computeDistancesForCellIndex(startIndex);
@@ -382,8 +338,8 @@ export class Grid {
         maxDistance
       );
       ctx.fillRect(
-        this.cells[index].coordinate.x * cellWidth,
-        this.cells[index].coordinate.y * cellHeight,
+        this.cells[index].x * cellWidth,
+        this.cells[index].y * cellHeight,
         cellWidth,
         cellHeight
       );
