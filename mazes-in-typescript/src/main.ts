@@ -1,7 +1,7 @@
 import "./style.css";
 
+import { aldousBroder } from "./aldousBroder";
 import { Grid } from "./grid";
-import { sidewinder } from "./sidewinder";
 
 const app = document.querySelector("#app")! as HTMLDivElement;
 const canvas = document.createElement("canvas") as HTMLCanvasElement;
@@ -12,7 +12,7 @@ const ctx = canvas.getContext("2d")!;
 const grid = new Grid(25, 25);
 const rootX = 12;
 const rootY = 12;
-sidewinder(grid);
+aldousBroder(grid);
 const distanceByIndex = grid.computeDistancesForCell(rootX, rootY);
 if (!distanceByIndex) {
   throw new Error("Couldn't calculate cell distances");

@@ -47,4 +47,18 @@ export class Cell {
     this.unlinkInternal(cell.x, cell.y, direction);
     cell.unlinkInternal(this.x, this.y, oppositeDirection(direction));
   }
+
+  neighborDirection(cell: Cell) {
+    if (cell.x === this.x && cell.y === this.y + 1) {
+      return DirectedCellLink.NORTH;
+    } else if (cell.x === this.x && cell.y === this.y - 1) {
+      return DirectedCellLink.SOUTH;
+    } else if (cell.x === this.x + 1 && cell.y === this.y) {
+      return DirectedCellLink.EAST;
+    } else if (cell.x === this.x - 1 && cell.y === this.y) {
+      return DirectedCellLink.WEST;
+    } else {
+      return null;
+    }
+  }
 }
