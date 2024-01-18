@@ -32,36 +32,41 @@ export class Grid {
     return this.cells[index];
   }
 
+  private cellIsOnGrid(x: number, y: number) {
+    return x < 0 || x >= this.columns || y < 0 || y >= this.rows;
+  }
+
   getCell(x: number, y: number) {
-    if (x < 0 || x >= this.columns || y < 0 || y >= this.rows) {
+    if (this.cellIsOnGrid(x, y)) {
       return null;
     }
     return this.getCellAtIndex(this.getCellIndex(x, y));
   }
 
-  getCellNorth(cell: Cell) {
-    return this.getCell(cell.x, cell.y + 1);
+  getCellNorth(x: number, y: number) {
+    return this.getCell(x, y + 1);
   }
 
-  getCellSouth(cell: Cell) {
-    return this.getCell(cell.x, cell.y - 1);
+  getCellSouth(x: number, y: number) {
+    return this.getCell(x, y - 1);
   }
 
-  getCellEast(cell: Cell) {
-    return this.getCell(cell.x + 1, cell.y);
+  getCellEast(x: number, y: number) {
+    return this.getCell(x + 1, y);
   }
 
-  getCellWest(cell: Cell) {
-    return this.getCell(cell.x - 1, cell.y);
+  getCellWest(x: number, y: number) {
+    return this.getCell(x - 1, y);
   }
 
-  getCellNeighbors(cell: Cell) {
-    const result: Cell[] = [];
+  getCellNeighbors(cellX: number, cellY: number) {
+    const result: [number, number][] = [];
     for (let y = -1; y <= 1; y++) {
       for (let x = -1; x <= 1; x++) {
-        const possibleCell = this.getCell(x + cell.x, y + cell.y);
-        if (possibleCell) {
-          result.push(possibleCell);
+        const currentX = x + cellX;
+        const currentY = y + cellY;
+        if (this.cellIsOnGrid(currentX, currentY)) {
+          result.push([currentX, currentY]);
         }
       }
     }

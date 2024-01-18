@@ -10,13 +10,16 @@ export function sidewinder(grid: Grid) {
         throw new Error("I can't believe in anything");
       }
       run.push(cell);
-      const cellEast = grid.getCellEast(cell);
-      const cellNorth = grid.getCellNorth(cell);
+      const cellEast = grid.getCellEast(cell.x, cell.y);
+      const cellNorth = grid.getCellNorth(cell.x, cell.y);
       const heads = Math.random() > 0.5;
       const endRun = !cellEast || (!!cellNorth && heads);
       if (endRun) {
         const northTunneler = run[Math.floor(Math.random() * run.length)];
-        const northTunnelerNorthCell = grid.getCellNorth(northTunneler);
+        const northTunnelerNorthCell = grid.getCellNorth(
+          northTunneler.x,
+          northTunneler.y
+        );
         if (northTunnelerNorthCell) {
           northTunneler.link(northTunnelerNorthCell, DirectedCellLink.NORTH);
         }
