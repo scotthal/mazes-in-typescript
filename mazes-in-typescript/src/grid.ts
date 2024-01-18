@@ -33,11 +33,11 @@ export class Grid {
   }
 
   private cellIsOnGrid(x: number, y: number) {
-    return x < 0 || x >= this.columns || y < 0 || y >= this.rows;
+    return x >= 0 && x < this.columns && y >= 0 && y < this.rows;
   }
 
   getCell(x: number, y: number) {
-    if (this.cellIsOnGrid(x, y)) {
+    if (!this.cellIsOnGrid(x, y)) {
       return null;
     }
     return this.getCellAtIndex(this.getCellIndex(x, y));
@@ -65,6 +65,12 @@ export class Grid {
       for (let x = -1; x <= 1; x++) {
         const currentX = x + cellX;
         const currentY = y + cellY;
+        if (
+          (currentX === cellX && currentY === cellY) ||
+          (currentX !== cellX && currentY !== cellY)
+        ) {
+          continue;
+        }
         if (this.cellIsOnGrid(currentX, currentY)) {
           result.push([currentX, currentY]);
         }
