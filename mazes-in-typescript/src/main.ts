@@ -1,6 +1,6 @@
 import "./style.css";
 
-import { aldousBroder } from "./aldousBroder";
+import { wilson } from "./wilson";
 import { Grid } from "./grid";
 
 const app = document.querySelector("#app")! as HTMLDivElement;
@@ -12,7 +12,7 @@ const ctx = canvas.getContext("2d")!;
 const grid = new Grid(25, 25);
 const rootX = 12;
 const rootY = 12;
-aldousBroder(grid);
+wilson(grid);
 const distanceByIndex = grid.computeDistancesForCell(rootX, rootY);
 if (!distanceByIndex) {
   throw new Error("Couldn't calculate cell distances");
