@@ -10,7 +10,7 @@
     "preview": "vite preview"
   },
   "devDependencies": {
-    "typescript": "^5.2.2",
-    "vite": "^5.0.8"
+    "typescript": "^5.7.3",
+    "vite": "^6.1.1"
   }
 }
